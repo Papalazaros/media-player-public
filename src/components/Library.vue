@@ -15,7 +15,7 @@
             <v-btn icon>
               <v-icon color="yellow">mdi-pencil</v-icon>
             </v-btn>
-            <v-btn icon>
+            <v-btn @click="deleteVideo(video)" icon>
               <v-icon color="error">mdi-delete</v-icon>
             </v-btn>
           </v-card-actions>
@@ -25,6 +25,8 @@
   </v-container>
 </template>
 <script>
+import videoService from "../services/VideoService";
+
 export default {
   props: {
     videos: {
@@ -36,9 +38,9 @@ export default {
     Thumbnail: () => import("./Thumbnail.vue"),
   },
   methods: {
-    emitItemEvent(event, item) {
-      this.$emit(event, item);
-    },
+    deleteVideo(video) {
+      videoService.deleteVideo(video.videoId);
+    }
   },
   data: function () {
     return {

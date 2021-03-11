@@ -5,14 +5,14 @@ const client = axios.create({
     baseURL: 'https://localhost:5001/Videos'
 });
 
-async function execute(method, resource, params, data) {
+async function execute(method, url, params, data, headers) {
     let accessToken = await Vue.prototype.$auth.getTokenSilently();
 
     return client({
         method,
-        url: resource,
-        data,
+        url,
         params,
+        data,
         headers: {
             Authorization: `Bearer ${accessToken}`
         }
@@ -20,6 +20,7 @@ async function execute(method, resource, params, data) {
         return req.data;
     }).catch((error) => {
         console.log(error);
+        return error;
     });
 }
 
@@ -33,13 +34,14 @@ export default {
 
         return execute('get', url);
     },
-    getAll(roomId) {
-        let url = '?videoStatus=Ready';
-
-        if (roomId) {
-            url += `&roomId=${roomId}`;
-        }
-        return execute('get', url);
+    createVideo(video) {
+        return execute('post', null, null, video);
+    },
+    deleteVideo(videoId) {
+        return execute('delete', `/${videoId}`);
+    },
+    getAll() {
+        return execute('get', '?videoStatus=Ready');
     },
     getDetail(videoId) {
         return execute('get', `/${videoId}`);

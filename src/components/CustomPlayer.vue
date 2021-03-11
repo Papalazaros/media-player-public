@@ -113,9 +113,8 @@ export default {
   },
   computed: {
     recentlyPlayedVideos() {
-      const self = this;
-      if (self.playedVideos.length <= 10) return self.playedVideos;
-      return self.playedVideos.slice(10 * -1, -1);
+      if (this.playedVideos.length <= 10) return this.playedVideos;
+      return this.playedVideos.slice(10 * -1, -1);
     },
   },
   props: {
@@ -124,92 +123,87 @@ export default {
   },
   watch: {
     currentVideoDetail(newVideo, oldVideo) {
-      const self = this;
-
       if (
-        (oldVideo && self.playedVideos.length === 0) ||
-        (self.playedVideos.length &&
-          self.playedVideos[self.playedVideos.length - 1].videoId !=
+        (oldVideo && this.playedVideos.length === 0) ||
+        (this.playedVideos.length &&
+          this.playedVideos[this.playedVideos.length - 1].videoId !=
             oldVideo.videoId)
       ) {
-        self.playedVideos.push(oldVideo);
+        this.playedVideos.push(oldVideo);
       }
 
-      self
-        .getStreamFromVideoId(self.currentVideoDetail.videoId)
-        .then((src) => (self.video.src = src));
+      if (this.currentVideoDetail) {
+        this
+          .getStreamFromVideoId(this.currentVideoDetail.videoId)
+          .then((src) => (this.video.src = src));
 
-      syncService.sendChangeMessage(
-        self.roomId,
-        self.currentVideoDetail.videoId
-      );
+        syncService.sendChangeMessage(
+          this.roomId,
+          this.currentVideoDetail.videoId
+        );
+      }
     },
   },
   mounted: async function () {
-    const self = this;
+    this.initializeElements();
+    this.addListeners();
 
-    self.initializeElements();
-    self.addListeners();
-
-    if (self.videoId) {
-      self.getVideoDetail(self.videoId).then((videoDetail) => {
-        self.currentVideoDetail = videoDetail;
+    if (this.videoId) {
+      this.getVideoDetail(this.videoId).then((videoDetail) => {
+        this.currentVideoDetail = videoDetail;
       });
     } else {
-      self.getNextVideo();
+      this.getNextVideo();
     }
 
-    videoService.getAll(self.roomId).then((allVideos) => {
-      self.allVideos = allVideos;
+    videoService.getAll(this.roomId).then((allVideos) => {
+      this.allVideos = allVideos;
     });
 
     syncService.createConnection().then((connection) => {
-      self.connection = connection;
-      syncService.joinRoom(self.roomId);
-      self.connection.on("VideoSyncMessage", (message) =>
-        self.messageReceived(message)
+      this.connection = connection;
+      syncService.joinRoom(this.roomId);
+      this.connection.on("VideoSyncMessage", (message) =>
+        this.messageReceived(message)
       );
     });
 
-    roomService.canEdit(self.roomId).then((canEdit) => {
-      self.canEdit = canEdit;
+    roomService.canEdit(this.roomId).then((canEdit) => {
+      this.canEdit = canEdit;
     });
   },
   methods: {
     handleVolumeChange(volume) {
-      const self = this;
-      self.video.volume = (volume / 100).toFixed(2);
+      this.video.volume = (volume / 100).toFixed(2);
     },
     handleProgressChange(time) {
-      const self = this;
-      self.video.currentTime = time;
-      syncService.sendSeekMessage(self.roomId, time);
+      this.video.currentTime = time;
+      syncService.sendSeekMessage(this.roomId, time);
     },
     messageReceived(message) {
-      const self = this;
-      if (!self.syncronized) return;
+      if (!this.syncronized) return;
 
       const parsedValue = parseFloat(message.payload);
 
       switch (message.videoSyncOperation.toLowerCase()) {
         case "stop":
-          self.stopVideo();
+          this.stopVideo();
           break;
         case "pause":
-          self.video.pause();
+          this.video.pause();
           break;
         case "play":
-          self.video.play();
+          this.video.play();
           break;
         case "seek":
-          if (parsedValue >= 0 && parsedValue <= self.video.duration) {
-            self.handleProgressChange(parsedValue);
+          if (parsedValue >= 0 && parsedValue <= this.video.duration) {
+            this.handleProgressChange(parsedValue);
           }
           break;
         case "changevideo":
-          if (self.currentVideoDetail.videoId != message.payload) {
-            self.getVideoDetail(message.payload).then((videoDetail) => {
-              self.playVideo(videoDetail);
+          if (this.currentVideoDetail.videoId != message.payload) {
+            this.getVideoDetail(message.payload).then((videoDetail) => {
+              this.playVideo(videoDetail);
             });
           }
           break;
@@ -225,121 +219,109 @@ export default {
       );
     },
     playVideo(videoDetail) {
-      const self = this;
       if (!videoDetail) return;
-      self.currentVideoDetail = videoDetail;
+      this.currentVideoDetail = videoDetail;
     },
     initializeElements() {
-      const self = this;
-
-      self.video = document.getElementById("video");
-      self.video.controls = false;
-      self.videoContainer = document.getElementById("videoContainer");
-      self.isMuted = self.video.muted;
+      this.video = document.getElementById("video");
+      this.video.controls = false;
+      this.videoContainer = document.getElementById("videoContainer");
+      this.isMuted = this.video.muted;
     },
     addListeners() {
-      const self = this;
-
-      document.addEventListener("fullscreenchange", function () {
-        self.setFullscreenData(
+      document.addEventListener("fullscreenchange", () => {
+        this.setFullscreenData(
           !!(document.fullScreen || document.fullscreenElement)
         );
       });
-      document.addEventListener("webkitfullscreenchange", function () {
-        self.setFullscreenData(!!document.webkitIsFullScreen);
+      document.addEventListener("webkitfullscreenchange", () => {
+        this.setFullscreenData(!!document.webkitIsFullScreen);
       });
-      document.addEventListener("mozfullscreenchange", function () {
-        self.setFullscreenData(!!document.mozFullScreen);
+      document.addEventListener("mozfullscreenchange", () => {
+        this.setFullscreenData(!!document.mozFullScreen);
       });
-      document.addEventListener("msfullscreenchange", function () {
-        self.setFullscreenData(!!document.msFullscreenElement);
-      });
-
-      if (!self.video) return;
-
-      self.video.addEventListener("timeupdate", function () {
-        self.currentTime = self.video.currentTime;
+      document.addEventListener("msfullscreenchange", () => {
+        this.setFullscreenData(!!document.msFullscreenElement);
       });
 
-      self.video.addEventListener("ended", self.trackVideoState);
-      self.video.addEventListener("pause", self.trackVideoState);
-      self.video.addEventListener("play", self.trackVideoState);
-      self.video.addEventListener("volumechange", self.trackAudioState);
-      self.video.addEventListener(
+      if (!this.video) return;
+
+      this.video.addEventListener("timeupdate", () => {
+        this.currentTime = this.video.currentTime;
+      });
+
+      this.video.addEventListener("ended", this.trackVideoState);
+      this.video.addEventListener("pause", this.trackVideoState);
+      this.video.addEventListener("play", this.trackVideoState);
+      this.video.addEventListener("volumechange", this.trackAudioState);
+      this.video.addEventListener(
         "durationchange",
-        () => (self.videoDuration = self.video.duration)
+        () => (this.videoDuration = this.video.duration)
       );
     },
     trackVideoState(e) {
-      const self = this;
-      self.videoState = e.type;
+      this.videoState = e.type;
     },
     trackAudioState() {
-      const self = this;
-      self.isMuted = self.video.muted;
+      this.isMuted = this.video.muted;
     },
     playOrPauseVideo() {
-      const self = this;
-      if (self.video.paused || self.video.ended) {
-        self.video.play();
-        syncService.sendPlayMessage(self.roomId);
+      if (this.video.paused || this.video.ended) {
+        this.video.play();
+        syncService.sendPlayMessage(this.roomId);
       } else {
-        self.video.pause();
-        syncService.sendPauseMessage(self.roomId);
+        this.video.pause();
+        syncService.sendPauseMessage(this.roomId);
       }
     },
     stopVideo() {
-      const self = this;
-      self.video.pause();
-      self.handleProgressChange(0);
-      syncService.SendStopMessage(self.roomId);
+      this.video.pause();
+      this.handleProgressChange(0);
+      syncService.SendStopMessage(this.roomId);
     },
     muteOrUnmuteVideo() {
-      const self = this;
-      self.video.muted = !self.video.muted;
+      this.video.muted = !this.video.muted;
     },
     getNextVideo() {
-      const self = this;
+      if (this.nextVideos.length) {
+        const previousVideoDetail = this.currentVideoDetail;
+        this.currentVideoDetail = this.nextVideos.shift();
 
-      if (self.nextVideos.length) {
-        const previousVideoDetail = self.currentVideoDetail;
-        self.currentVideoDetail = self.nextVideos.shift();
-
-        if (previousVideoDetail === self.currentVideoDetail) {
-          self.handleProgressChange(0);
-          self.video.play();
+        if (previousVideoDetail === this.currentVideoDetail) {
+          this.handleProgressChange(0);
+          this.video.play();
         }
       } else {
-        videoService.getRandom(self.roomId).then(async (ids) => {
-          if (ids && ids.length) {
-            self.currentVideoDetail = ids[0];
-          }
-        });
+        if (this.currentVideoDetail && this.allVideos.length > this.currentVideoIndex + 1) {
+          this.currentVideoIndex++;
+        }
+        else {
+          this.currentVideoIndex = 0;
+        }
+        this.currentVideoDetail =  this.allVideos[this.currentVideoIndex];
       }
     },
     getVideoDetail(videoId) {
       return videoService.getDetail(videoId);
     },
     async getStreamFromVideoId(videoId) {
-      const self = this;
       if (videoId) {
-        let accessToken = await self.$auth.getTokenSilently();
+        let accessToken = await this.$auth.getTokenSilently();
         return `https://localhost:5001/Videos/${videoId}/Stream?accessToken=${accessToken}`;
       }
 
       return null;
     },
     getPreviousVideo() {
-      const self = this;
-
       if (
-        self.video.currentTime / self.video.duration > 0.15 ||
-        self.playedVideos.length === 0
+        this.video.currentTime / this.video.duration > 0.15 ||
+        this.playedVideos.length === 0
       ) {
-        self.handleProgressChange(0);
-      } else if (self.playedVideos.length > 0) {
-        self.nextVideos.unshift(self.currentVideoDetail);
-        self.currentVideoDetail = self.playedVideos.pop();
+        this.handleProgressChange(0);
+      } else if (this.playedVideos.length > 0) {
+        this.nextVideos.unshift(this.currentVideoDetail);
+        this.currentVideoDetail = this.playedVideos.pop();
+        this.currentVideoIndex = this.allVideos.findIndex(video => video.videoId === this.currentVideoDetail.videoId);
       }
     },
     isFullScreen() {
@@ -352,37 +334,33 @@ export default {
       );
     },
     handleFullscreen() {
-      const self = this;
-      if (self.isFullScreen()) {
+      if (this.isFullScreen()) {
         if (document.exitFullscreen) document.exitFullscreen();
         else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
         else if (document.webkitCancelFullScreen)
           document.webkitCancelFullScreen();
         else if (document.msExitFullscreen) document.msExitFullscreen();
-        self.setFullscreenData(false);
+        this.setFullscreenData(false);
       } else {
-        if (self.videoContainer.requestFullscreen)
-          self.videoContainer.requestFullscreen();
-        else if (self.videoContainer.mozRequestFullScreen)
-          self.videoContainer.mozRequestFullScreen();
-        else if (self.videoContainer.webkitRequestFullScreen)
-          self.videoContainer.webkitRequestFullScreen();
-        else if (self.videoContainer.msRequestFullscreen)
-          self.videoContainer.msRequestFullscreen();
-        self.setFullscreenData(true);
+        if (this.videoContainer.requestFullscreen)
+          this.videoContainer.requestFullscreen();
+        else if (this.videoContainer.mozRequestFullScreen)
+          this.videoContainer.mozRequestFullScreen();
+        else if (this.videoContainer.webkitRequestFullScreen)
+          this.videoContainer.webkitRequestFullScreen();
+        else if (this.videoContainer.msRequestFullscreen)
+          this.videoContainer.msRequestFullscreen();
+        this.setFullscreenData(true);
       }
     },
     setFullscreenData(state) {
-      const self = this;
-      self.videoContainer.setAttribute("data-fullscreen", !!state);
+      this.videoContainer.setAttribute("data-fullscreen", !!state);
     },
     addToQueue(video) {
-      const self = this;
-      self.nextVideos.push(video);
+      this.nextVideos.push(video);
     },
     removeFromQueue(index) {
-      const self = this;
-      self.nextVideos.splice(index, 1);
+      this.nextVideos.splice(index, 1);
     },
   },
   data: function () {
@@ -403,6 +381,7 @@ export default {
       messages: [],
       syncronized: true,
       canEdit: false,
+      currentVideoIndex: 0,
       actionButtons: [
         {
           icon: "mdi-delete",

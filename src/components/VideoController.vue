@@ -69,30 +69,27 @@ export default {
   },
   watch: {
     currentTime() {
-      const self = this;
-
       const newProgress = (
-        (self.currentTime / self.videoDuration) *
+        (this.currentTime / this.videoDuration) *
         100
       ).toFixed(1);
 
-      if (self.progress != newProgress) {
-        self.progress = newProgress;
+      if (this.progress != newProgress) {
+        this.progress = newProgress;
       }
     },
     volume() {
       this.$emit("volume-changed", this.volume);
     },
     progress() {
-      const self = this;
-      let newTime = ((self.progress / 100) * self.videoDuration).toFixed(2);
-      const granularity = Math.min(self.videoDuration * 0.01, 0.25);
+      let newTime = ((this.progress / 100) * this.videoDuration).toFixed(2);
+      const granularity = Math.min(this.videoDuration * 0.01, 0.25);
 
       if (
-        newTime - self.currentTime > granularity ||
-        newTime - self.currentTime < granularity * -1
+        newTime - this.currentTime > granularity ||
+        newTime - this.currentTime < granularity * -1
       ) {
-        self.$emit("progress-changed", newTime);
+        this.$emit("progress-changed", newTime);
       }
     },
   },

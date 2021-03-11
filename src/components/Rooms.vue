@@ -1,5 +1,12 @@
 <template>
   <v-container fluid class="pa-0">
+    <v-file-input
+      truncate-length="15"
+      accept="video/*"
+      multiple
+      v-model="selectedFiles"
+    ></v-file-input>
+    <v-btn color="success" @click="uploadFiles">Upload Files</v-btn>
     <h1>Your rooms:</h1>
     <v-list class="pa-0">
       <template v-for="(room, index) in rooms">
@@ -20,6 +27,7 @@
         </v-list-item>
       </template>
     </v-list>
+    <h1>Your library:</h1>
     <Library :videos="videos" />
   </v-container>
 </template>
@@ -32,24 +40,43 @@ export default {
     Library: () => import("./Library.vue"),
   },
   mounted: async function () {
-    const self = this;
     roomService.getAll().then((rooms) => {
-      self.rooms = rooms;
+      this.rooms = rooms;
     });
 
     roomService.getMemberships().then((rooms) => {
-      self.memberships = rooms;
+      this.memberships = rooms;
     });
 
     videoService.getAll().then((videos) => {
-      self.videos = videos;
+      this.videos = videos;
     });
+  },
+  methods: {
+    uploadFiles() {
+      if (!(this.selectedFiles && this.selectedFiles.length)) {
+        return;
+      }
+      this.selectedFiles.forEach(file => {
+        let formData = new FormData();
+        formData.append('file', file);
+        videoService.createVideo(formData).then((res) => {
+          if (res && !res.isAxiosError && res.status === 'Uploaded') {
+            const foundFileIndex = this.selectedFiles.findIndex(x => x.name === file.name);
+            if (foundFileIndex !== -1) {
+              this.selectedFiles.splice(foundFileIndex, 1);
+            }
+          }
+        });
+      });
+    }
   },
   data: function () {
     return {
       rooms: [],
       videos: [],
       memberships: [],
+      selectedFiles: [],
     };
   },
 };

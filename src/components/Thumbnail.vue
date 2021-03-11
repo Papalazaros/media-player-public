@@ -9,13 +9,11 @@ export default {
     height: String,
   },
   mounted: function () {
-    const self = this;
-
     this.$auth
       .getTokenSilently()
       .then(
         (accessToken) =>
-          (self.src = `https://localhost:5001/Videos/${self.videoId}/thumbnail?accessToken=${accessToken}`)
+          (this.src = `https://localhost:5001/Videos/${this.videoId}/thumbnail?accessToken=${accessToken}`)
       );
   },
   data: function () {

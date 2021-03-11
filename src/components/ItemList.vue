@@ -43,16 +43,20 @@
       </v-card-title>
       <v-card-text class="pa-0">
         <v-list class="pa-0">
-          <template v-for="(item, index) in getVisibleVideos()">
-            <v-divider :key="index"></v-divider>
-            <slot name="item" v-bind:item="item" v-bind:index="index"></slot>
-          </template>
+          <Draggable v-model="videos" group="videos" @start="drag=true" @end="drag=false">
+            <template v-for="(item, index) in getVisibleVideos()">
+              <v-divider :key="index"></v-divider>
+              <slot name="item" v-bind:item="item" v-bind:index="index"></slot>
+            </template>
+          </Draggable>
         </v-list>
       </v-card-text>
     </v-card>
   </v-container>
 </template>
 <script>
+import Draggable from 'vuedraggable';
+
 export default {
   props: {
     videos: {
@@ -62,6 +66,9 @@ export default {
     title: String,
     includeSearch: Boolean,
   },
+  components: {
+    Draggable,
+  },  
   computed: {
     totalPages() {
       return Math.max(
@@ -107,19 +114,18 @@ export default {
       );
     },
     async searchMethod() {
-      const self = this;
-      let cleanedSearchString = self.search?.toLowerCase().trim();
+      let cleanedSearchString = this.search?.toLowerCase().trim();
 
-      while (self.searchStarted) {
+      while (this.searchStarted) {
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        const newSearchString = self.search?.toLowerCase().trim();
+        const newSearchString = this.search?.toLowerCase().trim();
 
         if (cleanedSearchString === newSearchString) {
-          self.filteredVideos = self.videos.filter((x) =>
+          this.filteredVideos = this.videos.filter((x) =>
             x.originalFileName.toLowerCase().includes(cleanedSearchString)
           );
-          self.searchStarted = false;
+          this.searchStarted = false;
         } else {
           cleanedSearchString = newSearchString;
         }
@@ -135,6 +141,7 @@ export default {
       filteredVideos: [],
       search: null,
       searchStarted: false,
+      drag: false,      
     };
   },
 };

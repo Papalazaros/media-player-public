@@ -16,10 +16,11 @@ async function execute(method, resource, params, data) {
         headers: {
             Authorization: `Bearer ${accessToken}`
         }
-    }).then(req => {
-        return req.data;
+    }).then(request => {
+        return request.data;
     }).catch((error) => {
         console.log(error);
+        return error;
     });
 }
 

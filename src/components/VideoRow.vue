@@ -83,8 +83,7 @@ export default {
     },
     sizeInMb() {
       if (!this.video) return 0;
-
-      return (this.video.length * 1e-6).toFixed(2);
+      return (this.video.encodedLength * 1e-6).toFixed(2);
     },
     duration() {
       if (!this.video) return 0;

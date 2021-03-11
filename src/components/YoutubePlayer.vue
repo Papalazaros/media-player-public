@@ -39,13 +39,12 @@ export default {
       this.player.setVolume(25);
     }
 
-    const self = this;
-    this.player.on("unstarted", () => (self.state = "unstarted"));
-    this.player.on("ended", () => (self.state = "ended"));
-    this.player.on("playing", () => (self.state = "playing"));
-    this.player.on("paused", () => (self.state = "paused"));
-    this.player.on("buffering", () => (self.state = "buffering"));
-    this.player.on("cued", () => (self.state = "cued"));
+    this.player.on("unstarted", () => (this.state = "unstarted"));
+    this.player.on("ended", () => (this.state = "ended"));
+    this.player.on("playing", () => (this.state = "playing"));
+    this.player.on("paused", () => (this.state = "paused"));
+    this.player.on("buffering", () => (this.state = "buffering"));
+    this.player.on("cued", () => (this.state = "cued"));
   },
   data: function () {
     return {
