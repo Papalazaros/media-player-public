@@ -34,6 +34,7 @@
               @volume-changed="handleVolumeChange"
               @progress-changed="handleProgressChange"
               @mute-or-unmute="muteOrUnmuteVideo"
+              @loop-toggle="toggleLoop"
             />
           </template>
         </VideoContainer>
@@ -172,6 +173,9 @@ export default {
     });
   },
   methods: {
+    toggleLoop() {
+      this.loop = !this.loop;
+    },
     handleVolumeChange(volume) {
       this.video.volume = (volume / 100).toFixed(2);
     },
@@ -282,7 +286,10 @@ export default {
       this.video.muted = !this.video.muted;
     },
     getNextVideo() {
-      if (this.nextVideos.length) {
+      if (this.loop) {
+        this.handleProgressChange(0);
+        this.video.play();
+      } else if (this.nextVideos.length) {
         const previousVideoDetail = this.currentVideoDetail;
         this.currentVideoDetail = this.nextVideos.shift();
 
@@ -387,6 +394,7 @@ export default {
       syncronized: true,
       canEdit: false,
       currentVideoIndex: 0,
+      loop: false,
       actionButtons: [
         {
           icon: "mdi-delete",

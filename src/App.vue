@@ -22,7 +22,6 @@ export default {
       handler: function() {
         this.$store.dispatch("setAllVideos"); 
       },
-      immediate: true,
     }
   },
   methods: {

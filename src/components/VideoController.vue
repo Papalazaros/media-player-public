@@ -19,6 +19,9 @@
         <v-btn small class="mr-2" icon @click="$emit('get-next')">
           <v-icon color="primary">mdi-skip-forward</v-icon>
         </v-btn>
+        <v-btn small class="mr-2" icon @click="$emit('loop-toggle');loop = !loop;">
+          <v-icon :color="loop ? 'error' : 'success'">mdi-refresh</v-icon>
+        </v-btn>
         <v-btn small icon :disabled="!fullScreenEnabled" @click="$emit('fullscreen')">
           <v-icon>mdi-arrow-expand</v-icon>
         </v-btn>

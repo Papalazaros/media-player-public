@@ -4,7 +4,7 @@ const baseUrl = 'http://localhost:5000';
 let connection;
 
 async function sendMessage(roomId, payload) {
-    if (connection) {
+    if (connection && connection.connectionState === 'Connected') {
         let accessToken = await Vue.prototype.$auth.getTokenSilently();
         connection.invoke("ReceiveSyncMessage", roomId, accessToken, payload)
             .catch(err => console.error(err.toString()));
