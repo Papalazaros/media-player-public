@@ -39,7 +39,11 @@ export default {
   },
   methods: {
     deleteVideo(video) {
-      videoService.deleteVideo(video.videoId);
+      videoService.deleteVideo(video.videoId).then((response) => {
+        if (response) {
+          this.$store.dispatch("removeVideo", video.videoId);
+        }
+      });
     }
   },
   data: function () {

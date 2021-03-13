@@ -43,20 +43,16 @@
       </v-card-title>
       <v-card-text class="pa-0">
         <v-list class="pa-0">
-          <Draggable v-model="videos" group="videos" @start="drag=true" @end="drag=false">
-            <template v-for="(item, index) in getVisibleVideos()">
-              <v-divider :key="index"></v-divider>
-              <slot name="item" v-bind:item="item" v-bind:index="index"></slot>
-            </template>
-          </Draggable>
+          <template v-for="(item, index) in getVisibleVideos()">
+            <v-divider :key="index"></v-divider>
+            <slot name="item" v-bind:item="item" v-bind:index="index"></slot>
+          </template>
         </v-list>
       </v-card-text>
     </v-card>
   </v-container>
 </template>
 <script>
-import Draggable from 'vuedraggable';
-
 export default {
   props: {
     videos: {
@@ -66,9 +62,6 @@ export default {
     title: String,
     includeSearch: Boolean,
   },
-  components: {
-    Draggable,
-  },  
   computed: {
     totalPages() {
       return Math.max(

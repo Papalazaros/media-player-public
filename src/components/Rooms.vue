@@ -28,7 +28,7 @@
       </template>
     </v-list>
     <h1>Your library:</h1>
-    <Library :videos="videos" />
+    <Library :videos="$store.getters.getAllVideos" />
   </v-container>
 </template>
 <script>
@@ -47,10 +47,6 @@ export default {
     roomService.getMemberships().then((rooms) => {
       this.memberships = rooms;
     });
-
-    videoService.getAll().then((videos) => {
-      this.videos = videos;
-    });
   },
   methods: {
     uploadFiles() {
@@ -60,8 +56,8 @@ export default {
       this.selectedFiles.forEach(file => {
         let formData = new FormData();
         formData.append('file', file);
-        videoService.createVideo(formData).then((res) => {
-          if (res && !res.isAxiosError && res.status === 'Uploaded') {
+        videoService.createVideo(formData).then((response) => {
+          if (response && response.status === 'Uploaded') {
             const foundFileIndex = this.selectedFiles.findIndex(x => x.name === file.name);
             if (foundFileIndex !== -1) {
               this.selectedFiles.splice(foundFileIndex, 1);
@@ -74,7 +70,6 @@ export default {
   data: function () {
     return {
       rooms: [],
-      videos: [],
       memberships: [],
       selectedFiles: [],
     };

@@ -77,7 +77,7 @@
           </template>
         </ItemList>
         <ItemList v-if="selectedTab === 2" class="side-card" title="Played" :videos="playedVideos">
-          <template v-slot:item="{ item }">
+          <template v-slot:item="{ item, index }">
             <VideoRow
               :video="item"
               :key="item.videoId.toString() + index"
@@ -112,6 +112,9 @@ export default {
     VideoContainer,
   },
   computed: {
+    allVideos() {
+      return this.$store.state.all_videos;
+    },
     recentlyPlayedVideos() {
       if (this.playedVideos.length <= 10) return this.playedVideos;
       return this.playedVideos.slice(10 * -1, -1);
@@ -155,10 +158,6 @@ export default {
     } else {
       this.getNextVideo();
     }
-
-    videoService.getAll(this.roomId).then((allVideos) => {
-      this.allVideos = allVideos;
-    });
 
     syncService.createConnection().then((connection) => {
       this.connection = connection;
@@ -298,6 +297,7 @@ export default {
         else {
           this.currentVideoIndex = 0;
         }
+
         this.currentVideoDetail =  this.allVideos[this.currentVideoIndex];
       }
     },
@@ -314,14 +314,20 @@ export default {
     },
     getPreviousVideo() {
       if (
-        this.video.currentTime / this.video.duration > 0.15 ||
-        this.playedVideos.length === 0
+        this.video.currentTime / this.video.duration > 0.15
       ) {
         this.handleProgressChange(0);
-      } else if (this.playedVideos.length > 0) {
-        this.nextVideos.unshift(this.currentVideoDetail);
-        this.currentVideoDetail = this.playedVideos.pop();
-        this.currentVideoIndex = this.allVideos.findIndex(video => video.videoId === this.currentVideoDetail.videoId);
+      } else if (this.currentVideoDetail) {
+        const currentIndex = this.allVideos.findIndex(video => video.videoId === this.currentVideoDetail.videoId);
+
+        if (currentIndex === 0) {
+          this.currentVideoIndex = this.allVideos.length - 1;
+        }
+        else {
+          this.currentVideoIndex--;
+        }
+
+        this.currentVideoDetail = this.allVideos[this.currentVideoIndex];
       }
     },
     isFullScreen() {
@@ -367,7 +373,6 @@ export default {
     return {
       playedVideos: [],
       nextVideos: [],
-      allVideos: [],
       videoContainer: null,
       video: null,
       videoState: null,

@@ -17,6 +17,14 @@
 </template>
 <script>
 export default {
+  watch: {
+    '$auth.isAuthenticated': {
+      handler: function() {
+        this.$store.dispatch("setAllVideos"); 
+      },
+      immediate: true,
+    }
+  },
   methods: {
     async login() {
       this.$auth.loginWithRedirect();

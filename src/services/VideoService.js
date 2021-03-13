@@ -5,7 +5,7 @@ const client = axios.create({
     baseURL: 'https://localhost:5001/Videos'
 });
 
-async function execute(method, url, params, data, headers) {
+async function execute(method, url, params, data) {
     let accessToken = await Vue.prototype.$auth.getTokenSilently();
 
     return client({
@@ -20,7 +20,6 @@ async function execute(method, url, params, data, headers) {
         return req.data;
     }).catch((error) => {
         console.log(error);
-        return error;
     });
 }
 
