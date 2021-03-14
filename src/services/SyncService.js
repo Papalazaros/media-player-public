@@ -33,13 +33,13 @@ export default {
     sendSeekMessage(roomId, time) {
         sendMessage(roomId, {
             "VideoSyncOperation": "Seek",
-            "Payload": time
+            "Payload": { currentTime: time }
         });
     },
-    sendChangeMessage(roomId, videoId) {
+    sendSyncMessage(roomId, payload) {
         sendMessage(roomId, {
-            "VideoSyncOperation": "ChangeVideo",
-            "Payload": videoId
+            "VideoSyncOperation": "Sync",
+            "Payload": payload
         });
     },
     sendPauseMessage(roomId) {

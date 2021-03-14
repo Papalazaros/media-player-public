@@ -1,5 +1,5 @@
 <template>
-  <v-img v-if="src" :max-width="width" :height="height" :src="src"></v-img>
+  <v-img @mouseenter="src = `https://localhost:5001/Videos/${videoId}/preview?accessToken=${accessToken}`" @mouseleave="src = `https://localhost:5001/Videos/${videoId}/thumbnail?accessToken=${accessToken}`" :max-width="width" :height="height" :src="src"></v-img>
 </template>
 <script>
 export default {
@@ -8,16 +8,13 @@ export default {
     width: String,
     height: String,
   },
-  mounted: function () {
-    this.$auth
-      .getTokenSilently()
-      .then(
-        (accessToken) =>
-          (this.src = `https://localhost:5001/Videos/${this.videoId}/thumbnail?accessToken=${accessToken}`)
-      );
+  created: async function () {
+    this.accessToken = await this.$auth.getTokenSilently();
+    this.src = `https://localhost:5001/Videos/${this.videoId}/thumbnail?accessToken=${this.accessToken}`;
   },
   data: function () {
     return {
+      accessToken: null,
       src: null,
     };
   },

@@ -113,9 +113,6 @@ export default {
     VideoContainer,
   },
   computed: {
-    allVideos() {
-      return this.$store.state.all_videos;
-    },
     recentlyPlayedVideos() {
       if (this.playedVideos.length <= 10) return this.playedVideos;
       return this.playedVideos.slice(10 * -1, -1);
@@ -141,12 +138,19 @@ export default {
           .getStreamFromVideoId(this.currentVideoDetail.videoId)
           .then((src) => (this.video.src = src));
 
-        syncService.sendChangeMessage(
+        syncService.sendSyncMessage(
           this.roomId,
-          this.currentVideoDetail.videoId
+          {
+            video: this.currentVideoDetail,
+            currentTime: this.video.currentTime,
+            videoState: this.videoState,
+          },
         );
       }
     },
+  },
+  created: async function() {
+    this.allVideos = await videoService.getAll(this.roomId);
   },
   mounted: async function () {
     this.initializeElements();
@@ -171,6 +175,19 @@ export default {
     roomService.canEdit(this.roomId).then((canEdit) => {
       this.canEdit = canEdit;
     });
+
+    this.$nextTick(function () {
+        window.setInterval(() => {
+          syncService.sendSyncMessage(
+            this.roomId,
+            {
+              video: this.currentVideoDetail,
+              currentTime: this.video.currentTime,
+              videoState: this.videoState,
+            },
+          );
+        }, 5000);
+    });
   },
   methods: {
     toggleLoop() {
@@ -185,10 +202,16 @@ export default {
     },
     messageReceived(message) {
       if (!this.syncronized) return;
-
-      const parsedValue = parseFloat(message.payload);
-
       switch (message.videoSyncOperation.toLowerCase()) {
+        case "sync":
+          this.playVideo(message.payload.video);
+
+          this.$nextTick(() => {
+            if (message.payload.currentTime && this.video.currentTime > message.payload.currentTime * 1.05 || this.video.currentTime < message.payload.currentTime * 0.95) {
+              this.video.currentTime = parseFloat(message.payload.currentTime);
+            }
+          })
+          break;
         case "stop":
           this.stopVideo();
           break;
@@ -199,16 +222,7 @@ export default {
           this.video.play();
           break;
         case "seek":
-          if (parsedValue >= 0 && parsedValue <= this.video.duration) {
-            this.handleProgressChange(parsedValue);
-          }
-          break;
-        case "changevideo":
-          if (this.currentVideoDetail.videoId != message.payload) {
-            this.getVideoDetail(message.payload).then((videoDetail) => {
-              this.playVideo(videoDetail);
-            });
-          }
+          this.video.currentTime = parseFloat(message.payload.currentTime);
           break;
         default:
           console.log(message);
@@ -222,7 +236,7 @@ export default {
       );
     },
     playVideo(videoDetail) {
-      if (!videoDetail) return;
+      if (!videoDetail || (this.currentVideoDetail && this.currentVideoDetail.videoId == videoDetail.videoId)) return;
       const currentIndex = this.allVideos.findIndex(video => video.videoId === videoDetail.videoId);
       this.currentVideoIndex = currentIndex;
       this.currentVideoDetail = videoDetail;
@@ -282,7 +296,7 @@ export default {
     stopVideo() {
       this.video.pause();
       this.handleProgressChange(0);
-      syncService.SendStopMessage(this.roomId);
+      syncService.sendStopMessage(this.roomId);
     },
     muteOrUnmuteVideo() {
       this.video.muted = !this.video.muted;
@@ -380,6 +394,7 @@ export default {
   },
   data: function () {
     return {
+      allVideos: [],
       playedVideos: [],
       nextVideos: [],
       videoContainer: null,

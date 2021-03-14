@@ -53,17 +53,14 @@ export default {
       if (!(this.selectedFiles && this.selectedFiles.length)) {
         return;
       }
+
+      const formData = new FormData();
       this.selectedFiles.forEach(file => {
-        let formData = new FormData();
-        formData.append('file', file);
-        videoService.createVideo(formData).then((response) => {
-          if (response && response.status === 'Uploaded') {
-            const foundFileIndex = this.selectedFiles.findIndex(x => x.name === file.name);
-            if (foundFileIndex !== -1) {
-              this.selectedFiles.splice(foundFileIndex, 1);
-            }
-          }
-        });
+        formData.append('files', file);
+      });
+      
+      videoService.createVideos(formData).then(() => {
+        this.selectedFiles = [];
       });
     }
   },

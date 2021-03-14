@@ -24,23 +24,18 @@ async function execute(method, url, params, data) {
 }
 
 export default {
-    getRandom(roomId) {
-        let url = '/Random?count=1&videoStatus=Ready';
-
-        if (roomId) {
-            url += `&roomId=${roomId}`;
-        }
-
-        return execute('get', url);
-    },
-    createVideo(video) {
-        return execute('post', null, null, video);
-    },
+    createVideos(videos) {
+        return execute('post', null, null, videos);
+    },    
     deleteVideo(videoId) {
         return execute('delete', `/${videoId}`);
     },
-    getAll() {
-        return execute('get', '?videoStatus=Ready');
+    getAll(roomId) {
+        let url = '?videoStatus=Ready'
+        if (roomId) {
+            url += `&roomId=${roomId}`
+        }
+        return execute('get', url);
     },
     getDetail(videoId) {
         return execute('get', `/${videoId}`);
