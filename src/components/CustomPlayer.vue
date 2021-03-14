@@ -95,6 +95,10 @@
 </template>
 <script>
 import VideoContainer from "./VideoContainer";
+import VideoController from "./VideoController";
+import ItemList from "./ItemList";
+import VideoRow from "./VideoRow";
+import LibraryMini from "./LibraryMini";
 import syncService from "../services/SyncService";
 import roomService from "../services/RoomService";
 import videoService from "../services/VideoService";
@@ -106,10 +110,10 @@ export default {
     });
   },
   components: {
-    LibraryMini: () => import("./LibraryMini.vue"),
-    VideoRow: () => import("./VideoRow.vue"),
-    ItemList: () => import("./ItemList.vue"),
-    VideoController: () => import("./VideoController.vue"),
+    LibraryMini,
+    VideoRow,
+    ItemList,
+    VideoController,
     VideoContainer,
   },
   computed: {

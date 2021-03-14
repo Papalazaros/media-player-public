@@ -3,6 +3,7 @@ import Router from 'vue-router';
 import {
     authGuard
 } from "../auth/authGuard";
+import Home from '../components/Home.vue';
 
 Vue.use(Router);
 
@@ -17,18 +18,12 @@ let router = new Router({
     routes: [{
             path: '/',
             name: 'Home',
-            component: () => import('../components/Rooms.vue')
+            component: Home
         },
         {
             path: '/library',
             name: 'Library',
             component: () => import('../components/CustomPlayer.vue'),
-            beforeEnter: authGuard
-        },
-        {
-            path: '/rooms',
-            name: 'Rooms',
-            component: () => import('../components/Rooms.vue'),
             beforeEnter: authGuard
         },
         {
