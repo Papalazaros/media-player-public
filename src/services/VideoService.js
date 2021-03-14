@@ -44,11 +44,5 @@ export default {
     },
     getDetail(videoId) {
         return execute('get', `/${videoId}`);
-    },
-    getThumbnail(videoId) {
-        return execute('get', `/${videoId}/thumbnail`);
-    },
-    getStream(videoId) {
-        return execute('get', `/${videoId}/Stream`);
     }
 };

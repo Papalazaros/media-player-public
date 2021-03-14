@@ -1,5 +1,5 @@
 <template>
-  <v-img :max-width="width" :height="height" :src="src"></v-img>
+  <v-img v-if="src" :max-width="width" :height="height" :src="src"></v-img>
 </template>
 <script>
 export default {
@@ -18,7 +18,7 @@ export default {
   },
   data: function () {
     return {
-      src: "",
+      src: null,
     };
   },
 };

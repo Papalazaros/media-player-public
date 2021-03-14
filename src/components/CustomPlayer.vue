@@ -223,6 +223,8 @@ export default {
     },
     playVideo(videoDetail) {
       if (!videoDetail) return;
+      const currentIndex = this.allVideos.findIndex(video => video.videoId === videoDetail.videoId);
+      this.currentVideoIndex = currentIndex;
       this.currentVideoDetail = videoDetail;
     },
     initializeElements() {

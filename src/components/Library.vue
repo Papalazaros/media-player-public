@@ -3,7 +3,7 @@
     <v-row dense>
       <v-col v-for="video in videos" :key="video.videoId" :cols="3" align="center">
         <v-card>
-          <v-card-title class="justify-center" v-text="video.originalFileName"></v-card-title>
+          <v-card-title class="video-title" v-text="video.originalFileName"></v-card-title>
           <v-card-text>
             <Thumbnail width="250px" height="250px" :videoId="video.videoId" />
           </v-card-text>
@@ -72,6 +72,15 @@ export default {
 
 <style scoped>
 .v-list-item__title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.video-title {
+  justify-content: center;
+  height: 75px;
+  width: 75%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
